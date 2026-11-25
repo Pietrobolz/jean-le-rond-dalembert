@@ -228,7 +228,7 @@
       <div class="section-heading">
         <p class="eyebrow">06 · Avatar e dialogo simulato</p>
         <h2 id="dialogue-title">Chiedi a <em>d’Alembert</em></h2>
-        <p>Prova le domande suggerite o scrivine una. Le risposte sono predefinite, basate sulle fonti indicate e semplificate per il ripasso: non sono generate da un’IA e non sono citazioni autentiche.</p>
+        <p>Prova le domande suggerite o scrivine una. Le risposte verificate sono sempre disponibili; facoltativamente puoi attivare un modello IA locale, che genera testo sul tuo dispositivo e può sbagliare. Nessuna risposta è una citazione autentica.</p>
       </div>
 
       <div class="dialogue">
@@ -293,6 +293,10 @@
               </button>
             </form>
             <p class="typing-status" id="typing-status" role="status" aria-live="polite"></p>
+            <div class="local-ai-controls">
+              <button class="local-ai-button" id="local-ai-toggle" type="button" aria-pressed="false">Avvia IA locale</button>
+              <p class="local-ai-status" id="local-ai-status" role="status" aria-live="polite">Opzionale: il primo avvio scarica il modello (centinaia di MB). Richiede WebGPU; non usa API key.</p>
+            </div>
           </div>
         </section>
       </div>
@@ -378,7 +382,7 @@
     </section>
 
     <footer class="page-footer">
-      <p><strong>Nota sul dialogo:</strong> l’avatar e le risposte predefinite sono una simulazione didattica; non sono un chatbot basato su IA e non rappresentano citazioni autentiche dell’autore.</p>
+      <p><strong>Nota sul dialogo:</strong> il chatbot offre risposte predefinite curate e una modalità IA locale facoltativa. Entrambe sono simulazioni didattiche, non sostituiscono le fonti e non sono citazioni autentiche dell’autore.</p>
       <a href="#inizio">Torna all’inizio ↑</a>
     </footer>
   </main>
