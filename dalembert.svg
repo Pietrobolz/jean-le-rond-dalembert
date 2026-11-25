@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 580" role="img" aria-labelledby="title description">
+  <title id="title">Filosofo del Settecento</title>
+  <desc id="description">Illustrazione originale di un uomo di scienza in abiti settecenteschi, con parrucca e giacca verde scuro.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8f1e4"/>
+      <stop offset="1" stop-color="#d8c6a5"/>
+    </linearGradient>
+    <linearGradient id="coat" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#40584c"/>
+      <stop offset="1" stop-color="#1f342d"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f1cfad"/>
+      <stop offset="1" stop-color="#dcae89"/>
+    </linearGradient>
+    <pattern id="paper-grain" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="8" r="0.8" fill="#806b47" opacity=".12"/>
+      <circle cx="25" cy="20" r="0.65" fill="#806b47" opacity=".10"/>
+      <path d="M2 28h5M21 5h4" stroke="#fff" stroke-opacity=".22"/>
+    </pattern>
+    <clipPath id="frame">
+      <rect x="21" y="21" width="438" height="538" rx="219"/>
+    </clipPath>
+  </defs>
+
+  <rect width="480" height="580" fill="#eee5d4"/>
+  <rect x="10" y="10" width="460" height="560" rx="230" fill="#a77a3b"/>
+  <rect x="16" y="16" width="448" height="548" rx="224" fill="#f8f1e4"/>
+  <g clip-path="url(#frame)">
+    <rect x="21" y="21" width="438" height="538" fill="url(#background)"/>
+    <path d="M38 451c27-93 99-137 202-137 108 0 182 46 202 137v124H38z" fill="#c6ad83" opacity=".43"/>
+    <path d="M38 492c27-57 92-95 162-101l40 33 42-33c75 7 135 45 160 101v90H38z" fill="url(#coat)"/>
+    <path d="m198 348-15 80 57 74 59-74-17-80z" fill="#d9b795"/>
+    <path d="m207 354 32 37 31-37 18 105-49 57-48-57z" fill="#f5eee1"/>
+    <path d="m214 378 25 21 24-21-9 49-15 19-16-19z" fill="#e1d5c2"/>
+
+    <path d="M132 205c-2-75 38-126 108-126 78 0 116 52 108 132l-13 121-69 63-78-47-45-72z" fill="#e9e3d6"/>
+    <path d="M136 198c-21-19-24-51-3-69-7-28 13-54 40-57-1-30 26-51 53-45 21-27 56-23 74-1 35-8 58 20 52 47 28 9 39 38 24 61 24 22 17 58-10 73 5 24-7 47-27 57-3-39-15-69-31-85-30 12-61 16-96 7-25 34-40 68-45 110-25-24-37-58-27-93z" fill="#eee9dc"/>
+    <path d="M141 118c-7-21 7-41 27-44-2-21 16-37 37-34 15-22 43-20 56-2 23-5 42 13 39 35 23 5 32 27 22 45" fill="none" stroke="#d3cbbb" stroke-linecap="round" stroke-width="12"/>
+    <g fill="#e9e3d6" stroke="#d3cbbb" stroke-width="2">
+      <circle cx="128" cy="151" r="19"/><circle cx="131" cy="180" r="18"/><circle cx="139" cy="210" r="18"/>
+      <circle cx="150" cy="239" r="18"/><circle cx="162" cy="267" r="18"/><circle cx="177" cy="292" r="16"/>
+      <circle cx="351" cy="153" r="19"/><circle cx="350" cy="184" r="18"/><circle cx="343" cy="214" r="18"/>
+      <circle cx="333" cy="244" r="18"/><circle cx="319" cy="272" r="18"/><circle cx="302" cy="296" r="16"/>
+      <circle cx="164" cy="92" r="16"/><circle cx="197" cy="73" r="17"/><circle cx="231" cy="68" r="16"/>
+      <circle cx="269" cy="73" r="17"/><circle cx="302" cy="91" r="16"/>
+    </g>
+
+    <path d="M166 204c1-46 31-77 73-77 44 0 73 31 74 77l-8 76c-5 42-32 73-67 73s-62-31-67-73z" fill="url(#skin)"/>
+    <path d="M168 198c8-39 36-63 73-63 39 0 65 21 72 59-18-8-35-20-45-39-22 22-58 37-100 43z" fill="#e8e0d2"/>
+    <path d="M179 223c10-8 23-8 34-1" fill="none" stroke="#684c3d" stroke-linecap="round" stroke-width="5"/>
+    <path d="M250 222c10-7 23-6 33 2" fill="none" stroke="#684c3d" stroke-linecap="round" stroke-width="5"/>
+    <ellipse cx="198" cy="237" rx="4" ry="3" fill="#344039"/>
+    <ellipse cx="267" cy="237" rx="4" ry="3" fill="#344039"/>
+    <path d="M232 235c-3 17-11 38-11 45 5 5 12 7 19 5" fill="none" stroke="#ba8d6e" stroke-linecap="round" stroke-width="4"/>
+    <path d="M207 293c14 10 34 10 48-1" fill="none" stroke="#915d4e" stroke-linecap="round" stroke-width="4"/>
+    <path d="M213 311c13 7 28 7 40-1" fill="none" stroke="#b57f68" stroke-linecap="round" stroke-width="2"/>
+    <path d="M177 249c-13 1-19 15-13 28 4 9 10 13 18 12M299 249c13 1 19 15 13 28-4 9-10 13-18 12" fill="url(#skin)" stroke="#bd916f" stroke-width="3"/>
+
+    <path d="M84 512c22-50 67-84 128-99l27 30 28-30c63 14 107 49 130 99" fill="none" stroke="#b28b51" stroke-width="5"/>
+    <path d="m149 411 45-37 46 37-43 76zM331 411l-45-37-46 37 43 76z" fill="#344b40" stroke="#b28b51" stroke-width="3"/>
+    <path d="m193 376 46 33 47-33" fill="none" stroke="#f8f1e4" stroke-width="10"/>
+    <path d="M239 412v113m-15-99 15 18 15-18-15 49-15 17 15 16 15-16-15-17" fill="none" stroke="#d4c6ae" stroke-width="4"/>
+    <circle cx="315" cy="444" r="5" fill="#d8b979"/>
+    <circle cx="324" cy="463" r="5" fill="#d8b979"/>
+    <circle cx="331" cy="483" r="5" fill="#d8b979"/>
+    <path d="M21 21h438v538H21z" fill="url(#paper-grain)" opacity=".55"/>
+  </g>
+  <rect x="21" y="21" width="438" height="538" rx="219" fill="none" stroke="#fff9ed" stroke-opacity=".8" stroke-width="2"/>
+</svg>
