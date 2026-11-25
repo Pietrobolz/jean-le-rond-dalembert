@@ -7,6 +7,8 @@ const sendButton = document.querySelector("#send-button");
 const resetButton = document.querySelector("#reset-chat");
 const typingStatus = document.querySelector("#typing-status");
 const chatStatus = document.querySelector("#chat-status");
+const localAiToggle = document.querySelector("#local-ai-toggle");
+const localAiStatus = document.querySelector("#local-ai-status");
 const portraitFrame = document.querySelector("#dialogo .portrait-frame");
 const quizForm = document.querySelector("#quiz-form");
 const quizResult = document.querySelector("#quiz-result");
@@ -14,7 +16,16 @@ const quizResult = document.querySelector("#quiz-result");
 const welcomeMessage =
   "Buongiorno. Possiamo discutere di scienza, ragione e sapere. Da quale questione desideri cominciare?";
 const responseDelay = 300;
+const localModelId = "Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
+const localModelModuleUrl = "https://esm.run/@mlc-ai/web-llm";
+const localModelPrompt = `Sei una simulazione didattica di Jean le Rond d'Alembert, non la persona storica.
+Rispondi in italiano, in modo chiaro e conciso, usando testo semplice. Attieniti al dossier seguente e alle conoscenze storiche documentate; non inventare citazioni, titoli, date o fatti. Se un'informazione non è nel dossier o non è certa, dichiaralo e invita a verificarla nelle fonti indicate. Non attribuire a d'Alembert opinioni sulle tecnologie moderne: puoi solo proporre confronti esplicitamente presentati come attuali.
+Dossier verificato: nato a Parigi nel 1717 e morto nel 1783; studiò diritto e medicina prima di dedicarsi alla matematica; entrò all'Académie des sciences nel 1741 e all'Académie française nel 1754. Fu matematico, fisico e filosofo. Collaborò con Denis Diderot all'Encyclopédie e ne scrisse il Discours préliminaire (1751), che presenta e organizza i saperi, anche in dialogo con la classificazione di Francis Bacon. Il Traité de dynamique (1743) espone il principio di d'Alembert in meccanica. L'Essai sur les éléments de philosophie (1759) riflette su scienza, filosofia e conoscenza. Lasciò il progetto dell'Encyclopédie nel 1759 nel contesto di controversie e censura; Diderot continuò a lavorarvi. Il suo contributo riguarda soprattutto la meccanica matematica e l'organizzazione e diffusione del sapere. Democrazie, diritti e istituzioni moderne derivano da processi storici più ampi e non vanno attribuiti a lui solo.
+La chat offre come riferimenti Treccani, Larousse, Académie française ed ENCCRE: sono piste per verificare le risposte, non fonti puntuali di ogni singola frase. Chiarisci che questa è una simulazione generata da IA, non una citazione autentica.`;
 let lastTopic = null;
+let localEngine = null;
+let localModelEnabled = false;
+let localModelLoading = false;
 
 const sourceLinks = {
   treccani: {
@@ -290,15 +301,174 @@ function findResponse(question) {
   };
 }
 
+function setLocalAiStatus(message, isError = false) {
+  localAiStatus.textContent = message;
+  localAiStatus.classList.toggle("is-error", isError);
+}
+
+function updateLocalAiControls() {
+  localAiToggle.setAttribute("aria-pressed", String(localModelEnabled));
+  localAiToggle.textContent = localModelLoading
+    ? "Caricamento IA…"
+    : localModelEnabled
+      ? "Disattiva IA locale"
+      : localEngine
+        ? "Riattiva IA locale"
+        : "Avvia IA locale";
+  localAiToggle.disabled = localModelLoading || sendButton.disabled;
+}
+
+function getVisibleConversation() {
+  return [...chatLog.querySelectorAll(".message-row")]
+    .map((row) => {
+      const text = row.querySelector(".message-text")?.textContent.trim();
+      if (!text) return null;
+      return {
+        role: row.classList.contains("user-message") ? "user" : "assistant",
+        content: text
+      };
+    })
+    .filter(Boolean)
+    .slice(-8);
+}
+
+function addLocalReferenceLinks(messageRow) {
+  const references = document.createElement("p");
+  references.className = "message-source-list";
+  references.append("Riferimenti da verificare: ");
+
+  [sourceLinks.treccani, sourceLinks.enccre, sourceLinks.academie].forEach((source, index) => {
+    if (index > 0) references.append(" · ");
+    const link = createSourceLink(source);
+    link.textContent = source.label;
+    references.append(link);
+  });
+
+  messageRow.querySelector(".message-bubble").append(references);
+}
+
+async function respondWithLocalModel(question) {
+  const row = createMessage("", "D’Alembert · IA locale (simulazione)", "assistant");
+  const answerElement = row.querySelector(".message-text");
+  chatLog.append(row);
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  try {
+    const messages = [
+      { role: "system", content: localModelPrompt },
+      ...getVisibleConversation()
+    ];
+    const stream = await localEngine.chat.completions.create({
+      messages,
+      stream: true,
+      temperature: 0.3,
+      max_tokens: 240
+    });
+
+    let answer = "";
+    for await (const chunk of stream) {
+      const text = chunk.choices[0]?.delta?.content;
+      if (typeof text === "string" && text) {
+        answer += text;
+        answerElement.textContent = answer;
+        chatLog.scrollTop = chatLog.scrollHeight;
+      }
+    }
+
+    answer = answer.trim();
+    if (!answer) throw new Error("Il modello non ha prodotto una risposta.");
+
+    answerElement.textContent = answer;
+    addLocalReferenceLinks(row);
+    addInlineSuggestions(row, [
+      "Puoi fare un esempio concreto?",
+      "Quale opera si collega a questo tema?",
+      "Come si collega al presente?"
+    ]);
+    lastTopic = findResponse(question);
+    setLocalAiStatus("IA locale attiva. Le risposte sono generate sul dispositivo e vanno verificate.");
+    chatLog.scrollTop = chatLog.scrollHeight;
+    return answer;
+  } catch (error) {
+    console.error("La generazione con il modello locale non è riuscita:", error);
+    row.remove();
+
+    const response = findResponse(question);
+    lastTopic = response;
+    const fallbackRow = createMessage(
+      response.answer,
+      "D’Alembert · risposta verificata",
+      "assistant",
+      response.source
+    );
+    chatLog.append(fallbackRow);
+    addInlineSuggestions(fallbackRow, response.followUps);
+    setLocalAiStatus("Generazione locale non riuscita: è mostrata una risposta predefinita verificata.", true);
+    chatLog.scrollTop = chatLog.scrollHeight;
+    return response.answer;
+  }
+}
+
+async function toggleLocalAi() {
+  if (localModelLoading || sendButton.disabled) return;
+
+  if (localEngine) {
+    localModelEnabled = !localModelEnabled;
+    updateLocalAiControls();
+    setLocalAiStatus(localModelEnabled
+      ? "IA locale attiva. Le risposte sono generate sul dispositivo e vanno verificate."
+      : "IA locale disattivata; restano disponibili le risposte predefinite.");
+    chatStatus.textContent = localModelEnabled ? "IA locale attiva" : "Risposte verificate";
+    return;
+  }
+
+  if (!navigator.gpu) {
+    setLocalAiStatus("Questo browser o dispositivo non supporta WebGPU. Puoi continuare con le risposte predefinite.", true);
+    return;
+  }
+
+  localModelLoading = true;
+  updateLocalAiControls();
+  setLocalAiStatus("Avvio del modello locale. Il primo caricamento può richiedere tempo e scaricare centinaia di MB.");
+
+  try {
+    const { CreateMLCEngine } = await import(localModelModuleUrl);
+    localEngine = await CreateMLCEngine(localModelId, {
+      initProgressCallback: (report) => {
+        const percentage = Number.isFinite(report.progress)
+          ? `${Math.round(report.progress * 100)}% · `
+          : "";
+        setLocalAiStatus(`${percentage}${report.text || "Caricamento del modello locale…"}`);
+      }
+    });
+    localModelEnabled = true;
+    setLocalAiStatus("Modello pronto. Le risposte sono generate sul dispositivo e vanno verificate.");
+    chatStatus.textContent = "IA locale attiva";
+  } catch (error) {
+    console.error("Impossibile inizializzare il modello IA locale:", error);
+    localModelEnabled = false;
+    chatStatus.textContent = "Risposte verificate";
+    setLocalAiStatus("Modello non disponibile. Verifica WebGPU, connessione o memoria; le risposte predefinite restano attive.", true);
+  } finally {
+    localModelLoading = false;
+    updateLocalAiControls();
+  }
+}
+
 function setBusy(isBusy) {
   questionInput.disabled = isBusy;
   sendButton.disabled = isBusy;
   resetButton.disabled = isBusy;
+  updateLocalAiControls();
   chatLog.querySelectorAll(".suggestion").forEach((button) => {
     button.disabled = isBusy;
   });
   typingStatus.textContent = isBusy ? "D’Alembert sta preparando la risposta…" : "";
-  chatStatus.textContent = isBusy ? "D’Alembert sta riflettendo…" : "A te la parola";
+  chatStatus.textContent = isBusy
+    ? "D’Alembert sta riflettendo…"
+    : localModelEnabled
+      ? "IA locale attiva"
+      : "A te la parola";
   portraitFrame.classList.toggle("is-thinking", isBusy);
   portraitFrame.classList.remove("is-speaking");
 }
@@ -345,19 +515,27 @@ async function submitQuestion(question) {
   await new Promise((resolve) => window.setTimeout(resolve, responseDelay));
   removeTypingIndicator();
 
-  const response = findResponse(cleanedQuestion);
-  lastTopic = response;
   portraitFrame.classList.remove("is-thinking");
   portraitFrame.classList.add("is-speaking");
-  chatStatus.textContent = "D’Alembert sta parlando…";
-  typingStatus.textContent = "Risposta simulata basata sulle fonti indicate";
+  let answer;
+  if (localModelEnabled && localEngine) {
+    chatStatus.textContent = "IA locale · generazione in corso";
+    typingStatus.textContent = "Risposta generata sul dispositivo: verifica sempre i riferimenti";
+    answer = await respondWithLocalModel(cleanedQuestion);
+  } else {
+    const response = findResponse(cleanedQuestion);
+    lastTopic = response;
+    chatStatus.textContent = "D’Alembert sta parlando…";
+    typingStatus.textContent = "Risposta simulata basata sulle fonti indicate";
 
-  const row = createMessage(response.answer, "D’Alembert · simulazione", "assistant", response.source);
-  chatLog.append(row);
-  addInlineSuggestions(row, response.followUps);
-  chatLog.scrollTop = chatLog.scrollHeight;
+    const row = createMessage(response.answer, "D’Alembert · simulazione", "assistant", response.source);
+    chatLog.append(row);
+    addInlineSuggestions(row, response.followUps);
+    chatLog.scrollTop = chatLog.scrollHeight;
+    answer = response.answer;
+  }
 
-  const speakingDuration = Math.min(2600, Math.max(950, response.answer.split(/\s+/).length * 22));
+  const speakingDuration = Math.min(2600, Math.max(950, answer.split(/\s+/).length * 22));
   await new Promise((resolve) => window.setTimeout(resolve, speakingDuration));
   setBusy(false);
   questionInput.focus();
@@ -427,6 +605,7 @@ chatLog.addEventListener("click", (event) => {
 });
 
 resetButton.addEventListener("click", resetConversation);
+localAiToggle.addEventListener("click", toggleLocalAi);
 
 quizForm.addEventListener("submit", (event) => {
   event.preventDefault();
